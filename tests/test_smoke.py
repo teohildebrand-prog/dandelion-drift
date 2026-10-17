@@ -48,6 +48,7 @@ def test_game_boots_and_plays(base_url, page):
 
     page.goto(base_url)
     page.wait_for_timeout(2000)
+    assert errors == [], "JavaScript errors on load:\n" + "\n".join(errors)
     assert page.is_visible("#title"), "title screen did not show"
     assert not page.is_visible("#glErr"), "WebGL failed to start"
 
