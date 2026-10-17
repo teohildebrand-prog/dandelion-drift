@@ -1,0 +1,157 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dandelion Drift</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/game.css">
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Dandelion Drift</h1>
+      <p>A playable slice of Thistledown Gorge, built from your level GDD and dressed like a 64-bit platformer: 240-line rendering, chunky low-poly shapes, vertex colour, fog and a sequenced soundtrack. Run, jump, hang off ledges, glide on a dandelion seed and grow your own updrafts on the way to the Old Oak crown.</p>
+    </div>
+    <div class="hbtns"><button class="btn" id="sndBtn" type="button" aria-pressed="true">Sound on</button><button class="btn" id="fsBtn" type="button">Fullscreen</button></div>
+  </header>
+
+  <div class="stage" id="stage" tabindex="0" aria-label="Game view">
+    <canvas id="c"></canvas>
+    <div id="touch" hidden>
+      <div id="stickBase" hidden><div id="stickKnob"></div></div>
+      <button id="pauseTouch" type="button">Pause</button>
+      <div class="tbtns">
+        <div class="tbtn sm" data-t="cam">CAM</div><div class="tbtn" data-t="q">Q</div><div class="tbtn" data-t="e">E</div>
+        <div class="tbtn" data-t="b">B</div><div class="tbtn" data-t="dive">DIVE</div><div class="tbtn a" data-t="a">A</div>
+      </div>
+    </div>
+    <div class="ol">
+      <div id="spores"></div><div id="kwarn"></div><div id="flash"></div>
+      <div id="hud" class="n64" hidden>
+        <div class="tl" id="tufts"></div>
+        <div class="tr">
+          <div class="cnt"><i class="ico"></i><small>×</small><span id="pollenN">000</span></div>
+          <div class="cnt"><i class="ico g"></i><small>×</small><span id="goldN">0</span></div>
+        </div>
+        <div class="bl"><div id="pods"></div><div id="pulse" class="ready"><span id="pulseN">Q</span></div></div>
+        <div id="prompt"></div>
+      </div>
+      <div id="toast" class="n64"></div>
+      <div id="banner" class="n64"></div>
+      <div id="card" class="n64"></div>
+      <div class="tbwrap"><div class="tb" id="textbox" hidden><span id="tbTitle"></span><p id="tbText"></p><i id="tbMore"></i></div></div>
+    </div>
+    <div id="radial" hidden></div>
+    <div class="ov" id="title">
+      <h2 class="logo" aria-label="Dandelion Drift"><span>D</span><span>a</span><span>n</span><span>d</span><span>e</span><span>l</span><span>i</span><span>o</span><span>n</span><span class="gap"></span><span>D</span><span>r</span><span>i</span><span>f</span><span>t</span></h2>
+      <p class="sub">Thistledown Gorge</p>
+      <button class="big" id="startBtn" type="button">Press Start</button>
+      <p class="titlekeys">WASD run · Space jump, again to open the seed · Shift close · hold right mouse or C to dive · E plant · Q pulse · Esc pause</p>
+    </div>
+    <div class="ov" id="pauseOv" hidden>
+      <div class="panel" role="dialog" aria-label="Paused">
+        <h2>Paused</h2>
+        <h3>Gorge map</h3>
+        <table class="map" id="mapTable"></table>
+        <p id="mapExtra" style="font-size:13px;color:#c8d4ff;margin:8px 0 0"></p>
+        <h3>Options</h3>
+        <div class="opts">
+          <button class="opt" id="optAssist" type="button">Kestrel warning <em></em></button>
+          <button class="opt" id="optTilt" type="button">Camera tilt in updrafts <em></em></button>
+          <button class="opt" id="optSharp" type="button">Resolution <em></em></button>
+          <button class="opt" id="optDither" type="button">Colour dither <em></em></button>
+          <button class="opt" id="optMus" type="button">Music <em></em></button>
+          <button class="opt" id="optSfx" type="button">Sound effects <em></em></button>
+        </div>
+        <div class="mbtns"><button class="big" id="resumeBtn" type="button">Resume</button><button class="big alt" id="cpBtn" type="button">Back to checkpoint</button><button class="big alt" id="quitBtn" type="button">Title screen</button></div>
+      </div>
+    </div>
+    <div class="ov" id="clearOv" hidden>
+      <div class="panel" role="dialog" aria-label="Course clear">
+        <h2>Course clear!</h2>
+        <p style="margin:0;color:#c8d4ff">Pip let go at the Old Oak crown. The seed drifts off to plant the next area's first flower.</p>
+        <div class="stats" id="clearStats"></div>
+        <div class="mbtns"><button class="big" id="againBtn" type="button">Play again</button><button class="big alt" id="roamBtn" type="button">Keep exploring</button></div>
+      </div>
+    </div>
+    <div id="glErr" hidden><p>This browser could not start WebGL, which the game needs. Try another browser, or turn on hardware acceleration.</p></div>
+    <div class="ol"><div id="iris"></div></div>
+  </div>
+
+  <div class="manual">
+    <section class="sec">
+      <h3>Controls</h3>
+      <p class="lead">Follows the GDD control table. Steering in the air is softer than on the ground.</p>
+      <div class="tscroll"><table class="kv">
+        <tr><th>Action</th><th>Keyboard + mouse</th><th>Gamepad</th></tr>
+        <tr><td>Move</td><td><kbd class="k">WASD</kbd></td><td>Left stick</td></tr>
+        <tr><td>Camera</td><td>Mouse (click to lock) or arrows · <kbd class="k">R</kbd> recenters</td><td>Right stick · LB/RB recenter</td></tr>
+        <tr><td>Jump</td><td><kbd class="k">Space</kbd></td><td>A</td></tr>
+        <tr><td>Open seed</td><td><kbd class="k">Space</kbd> again in the air</td><td>A in the air</td></tr>
+        <tr><td>Close seed / drop</td><td><kbd class="k">Shift</kbd></td><td>B</td></tr>
+        <tr><td>Tuck dive</td><td>Hold right mouse or <kbd class="k">C</kbd></td><td>Hold RT</td></tr>
+        <tr><td>Flare</td><td>Let go of the dive</td><td>Release RT</td></tr>
+        <tr><td>Plant</td><td><kbd class="k">E</kbd> tap = last plant, hold = pick (or <kbd class="k">1</kbd>–<kbd class="k">5</kbd>)</td><td>X</td></tr>
+        <tr><td>Seed pulse</td><td><kbd class="k">Q</kbd></td><td>Y</td></tr>
+        <tr><td>Ledge hang</td><td>Automatic with the seed closed · <kbd class="k">Space</kbd> climbs</td><td>Automatic · A climbs</td></tr>
+        <tr><td>Pause / map</td><td><kbd class="k">Esc</kbd> or <kbd class="k">P</kbd> · <kbd class="k">M</kbd> mutes</td><td>Start</td></tr>
+      </table></div>
+      <p class="lead" style="margin-top:12px">On a phone: drag the left half to move, drag the right half to look, and use the A, B, DIVE, E and Q buttons.</p>
+    </section>
+
+    <section class="sec">
+      <h3>What this slice covers</h3>
+      <p class="lead">One run up the gorge, about 6 to 10 minutes. Every system in the GDD is in, at demo scale.</p>
+      <div class="tscroll"><table class="kv">
+        <tr><th>GDD system</th><th>In the demo</th></tr>
+        <tr><td>Three tiers</td><td>Mossy Floor, Sunbaked Cliff (the Wasp Chimney), Windy Canopy up to the Old Oak crown at 140 m</td></tr>
+        <tr><td>Natural lift</td><td>Steam vents, sun-warmed rock thermal, branch gusts</td></tr>
+        <tr><td>All 5 plants</td><td>Fan Fern and Puffcap from the start, Sunpod in the chimney, Windbell and Bramble Ward in the canopy. Planting takes a pod and grows in 2 s</td></tr>
+        <tr><td>All 10 threats</td><td>Kestrel, paper wasp swarm, dragonfly, turbulence, downdraft, crosswind gusts, pitcher plant, spore puffball, sticky sundew, spider web</td></tr>
+        <tr><td>Collectables</td><td><span id="moteCount">Pollen</span> motes (every 100 adds a tuft, up to 5), seed pods, 3 golden seeds, 1 feather charm, 4 lost letters that reveal a shortcut</td></tr>
+        <tr><td>Health</td><td>3 seed tufts; losing all three sends Pip back to the last checkpoint and clears planted flora</td></tr>
+        <tr><td>Open questions</td><td>Options for a 2.5 s kestrel warning and for camera tilt in updrafts. Radial planting uses hold-to-pick plus tap-to-repeat</td></tr>
+        <tr><td>Not in yet</td><td>Windbell always bends wind straight up, the dusk revisit and golden seeds 4 and 5</td></tr>
+      </table></div>
+    </section>
+
+    <section class="sec wide">
+      <h3>The Wasp Chimney, as built</h3>
+      <p class="lead">The GDD's 3-minute sample challenge, laid out at its real heights. The camera pans up the chimney the first time you reach the mossy ledge.</p>
+      <ol class="walk">
+        <li><time>0:15–0:35</time><div><b>First lift</b><p>Jump, open the seed over the steam vent on the right and ride it 12 m to the east ledge. Twenty pollen motes spiral up the steam.</p></div></li>
+        <li><time>0:35–0:55</time><div><b>Crosswind timing</b><p>Gusts blow out of the crack in the west wall. Watch the grass bend, wait for the gap, then jump and glide 11 m across to the west ledge.</p></div></li>
+        <li><time>0:55–1:20</time><div><b>First plant</b><p>Take a pod from the seed head, plant a Fan Fern on the damp patch and ride it 15 m to the ledge above.</p></div></li>
+        <li><time>1:20–1:50</time><div><b>Wasp pass</b><p>The swarm loops clockwise around the nest. Glide east to the warm rock thermal and climb while they swing low and face left, or pulse them with Q.</p></div></li>
+        <li><time>1:50–2:10</time><div><b>Turbulence squeeze</b><p>From the high east ledge, tuck dive west through the pocket in the neck. Gliding into it closes your seed. Flare to land on the top shelf.</p></div></li>
+        <li><time>2:10–3:00</time><div><b>The puzzle</b><p>One pod, two patches. A Fan Fern on the ash patch reaches the exit ledge. A Sunpod there climbs 30 m to the hidden alcove and its golden seed, but only while the cloud shadow is away.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="sec wide">
+      <h3>Tuning used</h3>
+      <p class="lead">Starting values from the GDD tuning table, plus the platforming numbers it leaves open.</p>
+      <div class="tscroll"><table class="kv">
+        <tr><th>Parameter</th><th>Value</th><th>Source</th></tr>
+        <tr><td>Open-seed sink rate</td><td>1 m/s</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Air speed, open seed</td><td>4 m/s</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Tuck dive top speed</td><td>12 m/s</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Flare climb</td><td>6 m over 1 s at full dive speed</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Fan Fern / Sunpod lift</td><td>15 m / 30 m</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Kestrel dive warning</td><td>1.5 s (2.5 s assist)</td><td><span class="pill y">GDD</span></td></tr>
+        <tr><td>Run speed / jump height</td><td>6.2 m/s / about 2.4 m</td><td><span class="pill p">Demo</span></td></tr>
+        <tr><td>Climb rate in lift</td><td>About 5 m/s (Sunpod 6 m/s)</td><td><span class="pill p">Demo</span></td></tr>
+        <tr><td>Simulation</td><td>Fixed 120 Hz, drawn at 240 lines and scaled up</td><td><span class="pill p">Demo</span></td></tr>
+      </table></div>
+    </section>
+  </div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/level.js"></script>
+<script src="js/models.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+
+</body></html>
